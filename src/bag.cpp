@@ -24,6 +24,19 @@ bool Bag::remove(const Item &item) {
   return true;
 }
 
+bool Bag::removeAll(const Item &item) {
+  bool found = false;
+  for (auto it = m_items.begin(); it != m_items.end();) {
+    if (*it == item) {
+      m_items.erase(it);
+      found = true;
+    } else {
+      it++;
+    }
+  }
+  return found;
+}
+
 void Bag::display() const {
   std::cout << "Bag items:" << std::endl;
   for (const Item &item : m_items) {

@@ -9,7 +9,6 @@ public:
   std::string getName() const { return m_name; }
   int compare(const Item &other) const { return m_name.compare(other.m_name); }
 
-  operator std::string() const { return m_name; }
   friend bool operator==(const Item &left, const Item &right) {
     return left.compare(right) == 0;
   }

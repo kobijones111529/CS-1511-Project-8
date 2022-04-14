@@ -20,6 +20,8 @@ public:
   void add(std::string item) { add(Item(item)); }
   bool remove(const Item &item);
   bool remove(const std::string &item) { return remove(Item(item)); }
+  bool removeAll(const Item &item);
+  bool removeAll(const std::string &item) { return removeAll(Item(item)); }
   void clear() { m_items.clear(); }
   void display() const;
 
