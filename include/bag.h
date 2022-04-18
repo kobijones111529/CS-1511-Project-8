@@ -1,11 +1,12 @@
 #pragma once
 
+#include "dynamic_array.h"
 #include "item.h"
 
-#include <algorithm>
 #include <iostream>
+#include <memory>
+#include <new>
 #include <string>
-#include <vector>
 
 class Bag {
 public:
@@ -14,17 +15,17 @@ public:
   bool contains(const std::string &item) const;
   int getFrequencyOf(const Item &item) const;
   int getFrequencyOf(const std::string &item) const;
-  bool isEmpty() { return m_items.empty(); }
+  bool isEmpty() const { return m_items.empty(); }
 
-  void add(Item item) { m_items.push_back(item); }
+  void add(Item item);
   void add(std::string item) { add(Item(item)); }
   bool remove(const Item &item);
   bool remove(const std::string &item) { return remove(Item(item)); }
-  bool removeAll(const Item &item);
-  bool removeAll(const std::string &item) { return removeAll(Item(item)); }
+  int removeAll(const Item &item);
+  int removeAll(const std::string &item) { return removeAll(Item(item)); }
   void clear() { m_items.clear(); }
   void display() const;
 
 private:
-  std::vector<Item> m_items;
+  dynamic_array<Item> m_items;
 };

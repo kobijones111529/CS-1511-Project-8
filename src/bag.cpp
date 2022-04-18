@@ -1,7 +1,11 @@
 #include "bag.h"
 
 bool Bag::contains(const Item &item) const {
-  return std::find(m_items.begin(), m_items.end(), item) != m_items.end();
+  for (auto it = m_items.begin(); it != m_items.end(); it++) {
+    if (*it == item)
+      return true;
+  }
+  return false;
 }
 
 bool Bag::contains(const std::string &item) const {
@@ -9,37 +13,48 @@ bool Bag::contains(const std::string &item) const {
 }
 
 int Bag::getFrequencyOf(const Item &item) const {
-  return std::count(m_items.begin(), m_items.end(), item);
+  int frequency = 0;
+  for (auto it = m_items.begin(); it != m_items.end(); it++) {
+    if (*it == item)
+      frequency++;
+  }
+  return frequency;
 }
 
 int Bag::getFrequencyOf(const std::string &item) const {
   return getFrequencyOf(Item(item));
 }
 
+void Bag::add(Item item) { m_items.push_back(item); }
+
 bool Bag::remove(const Item &item) {
-  auto it = std::find(m_items.begin(), m_items.end(), item);
-  if (it == m_items.end())
+  auto pos = m_items.begin();
+  for (; pos != m_items.end() && *pos != item; pos++) {
+  }
+  if (pos == m_items.end()) {
     return false;
-  m_items.erase(it);
+  }
+  m_items.erase(pos);
   return true;
 }
 
-bool Bag::removeAll(const Item &item) {
-  bool found = false;
+int Bag::removeAll(const Item &item) {
+  int found = 0;
   for (auto it = m_items.begin(); it != m_items.end();) {
     if (*it == item) {
       m_items.erase(it);
-      found = true;
+      found++;
     } else {
       it++;
     }
   }
+
   return found;
 }
 
 void Bag::display() const {
   std::cout << "Bag items:" << std::endl;
-  for (const Item &item : m_items) {
-    std::cout << '\t' << item.getName() << std::endl;
+  for (auto it = m_items.begin(); it != m_items.end(); it++) {
+    std::cout << '\t' << it->getName() << std::endl;
   }
 }
