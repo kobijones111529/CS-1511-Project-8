@@ -4,25 +4,23 @@
 #include "item.h"
 
 #include <iostream>
-#include <memory>
-#include <new>
 #include <string>
 
 class Bag {
 public:
   int getSize() const { return m_items.size(); }
-  bool contains(const Item &item) const;
-  bool contains(const std::string &item) const;
-  int getFrequencyOf(const Item &item) const;
-  int getFrequencyOf(const std::string &item) const;
+  bool contains(Item const &item) const;
+  bool contains(std::string const &item) const;
+  int getFrequencyOf(Item const &item) const;
+  int getFrequencyOf(std::string const &item) const;
   bool isEmpty() const { return m_items.empty(); }
 
-  void add(const Item &item);
-  void add(const std::string &item) { add(Item(item)); }
-  bool remove(const Item &item);
-  bool remove(const std::string &item) { return remove(Item(item)); }
-  int removeAll(const Item &item);
-  int removeAll(const std::string &item) { return removeAll(Item(item)); }
+  void add(Item const &item);
+  void add(std::string const &item) { add(Item(item)); }
+  bool remove(Item const &item);
+  bool remove(std::string const &item) { return remove(Item(item)); }
+  int removeAll(Item const &item);
+  int removeAll(std::string const &item) { return removeAll(Item(item)); }
   void clear() { m_items.clear(); }
   void display() const;
 

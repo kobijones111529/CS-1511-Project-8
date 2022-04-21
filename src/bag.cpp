@@ -1,6 +1,6 @@
 #include "bag.h"
 
-bool Bag::contains(const Item &item) const {
+bool Bag::contains(Item const &item) const {
   for (auto it = m_items.begin(); it != m_items.end(); it++) {
     if (*it == item)
       return true;
@@ -8,11 +8,11 @@ bool Bag::contains(const Item &item) const {
   return false;
 }
 
-bool Bag::contains(const std::string &item) const {
+bool Bag::contains(std::string const &item) const {
   return contains(Item(item));
 }
 
-int Bag::getFrequencyOf(const Item &item) const {
+int Bag::getFrequencyOf(Item const &item) const {
   int frequency = 0;
   for (auto it = m_items.begin(); it != m_items.end(); it++) {
     if (*it == item)
@@ -21,13 +21,13 @@ int Bag::getFrequencyOf(const Item &item) const {
   return frequency;
 }
 
-int Bag::getFrequencyOf(const std::string &item) const {
+int Bag::getFrequencyOf(std::string const &item) const {
   return getFrequencyOf(Item(item));
 }
 
-void Bag::add(const Item &item) { m_items.push_back(item); }
+void Bag::add(Item const &item) { m_items.push_back(item); }
 
-bool Bag::remove(const Item &item) {
+bool Bag::remove(Item const &item) {
   auto pos = m_items.begin();
   for (; pos != m_items.end() && *pos != item; pos++) {
   }
@@ -38,7 +38,7 @@ bool Bag::remove(const Item &item) {
   return true;
 }
 
-int Bag::removeAll(const Item &item) {
+int Bag::removeAll(Item const &item) {
   int found = 0;
   for (auto it = m_items.begin(); it != m_items.end();) {
     if (*it == item) {

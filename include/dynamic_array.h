@@ -1,11 +1,16 @@
 #pragma once
 
-#include <memory>
+#include <cstddef>
+#include <utility>
 
 template <typename T> class dynamic_array {
 public:
+  struct const_iterator;
+
   struct iterator {
     iterator(T *ptr) : m_ptr(ptr) {}
+
+    operator const_iterator() const { return const_iterator(m_ptr); }
 
     T &operator*() const { return *m_ptr; }
     T *operator->() const { return m_ptr; }
@@ -27,24 +32,71 @@ public:
       --(*this);
       return tmp;
     }
-    friend bool operator==(const iterator &a, const iterator &b) {
+    friend bool operator==(iterator const &a, iterator const &b) {
       return a.m_ptr == b.m_ptr;
     }
-    friend bool operator!=(const iterator &a, const iterator &b) {
+    friend bool operator!=(iterator const &a, iterator const &b) {
       return a.m_ptr != b.m_ptr;
     }
-    friend iterator operator+(const iterator &left, const size_t &right) {
+    friend iterator operator+(iterator const &left, size_t const &right) {
       return iterator(left.m_ptr + right);
     }
-    friend iterator operator-(const iterator &left, const size_t &right) {
+    friend iterator operator-(iterator const &left, size_t const &right) {
       return iterator(left.m_ptr - right);
     }
-    friend size_t operator-(const iterator &left, const iterator &right) {
+    friend size_t operator-(iterator const &left, iterator const &right) {
       return left.m_ptr - right.m_ptr;
     }
 
   private:
     T *m_ptr;
+  };
+
+  struct const_iterator {
+    const_iterator(T const *ptr) : m_ptr(ptr) {}
+    const_iterator(iterator const &it) : m_ptr(std::addressof(*it)) {}
+
+    T const &operator*() const { return *m_ptr; }
+    T const *operator->() const { return m_ptr; }
+    const_iterator &operator++() {
+      m_ptr++;
+      return *this;
+    }
+    const_iterator operator++(int) {
+      const_iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+    const_iterator &operator--() {
+      m_ptr--;
+      return *this;
+    }
+    const_iterator operator--(int) {
+      const_iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    friend bool operator==(const_iterator const &a, const_iterator const &b) {
+      return a.m_ptr == b.m_ptr;
+    }
+    friend bool operator!=(const_iterator const &a, const_iterator const &b) {
+      return a.m_ptr != b.m_ptr;
+    }
+    friend const_iterator operator+(const_iterator const &left,
+                                    size_t const &right) {
+      return const_iterator(left.m_ptr + right);
+    }
+    friend const_iterator operator-(const_iterator const &left,
+                                    size_t const &right) {
+      return const_iterator(left.m_ptr - right);
+    }
+    friend size_t operator-(const_iterator const &left,
+                            const_iterator const &right) {
+      return left.m_ptr - right.m_ptr;
+    }
+
+  private:
+    T const *m_ptr;
   };
 
   dynamic_array() : m_size(0), m_capacity(0), m_buffer(nullptr) {}
@@ -58,6 +110,12 @@ public:
   iterator begin() const { return iterator(reinterpret_cast<T *>(m_buffer)); }
   iterator end() const {
     return iterator(reinterpret_cast<T *>(m_buffer) + m_size);
+  }
+  const_iterator cbegin() const {
+    return const_iterator(reinterpret_cast<T *>(m_buffer));
+  }
+  const_iterator cend() const {
+    return const_iterator(reinterpret_cast<T *>(m_buffer) + m_size);
   }
 
   size_t size() const noexcept { return m_size; }
@@ -84,7 +142,7 @@ public:
     return *(reinterpret_cast<T *>(m_buffer) + index);
   }
 
-  void push_back(const T &val) {
+  void push_back(T const &val) {
     if (m_size >= m_capacity)
       reserve(m_size * 2 + 1);
 
@@ -100,13 +158,8 @@ public:
     m_size++;
   }
 
-  iterator erase(const iterator pos) {
-    pos->~T();
-    for (iterator it = pos + 1; it != end(); it++) {
-      std::swap(*(it - 1), *it);
-    }
-    m_size--;
-    return pos;
+  iterator erase(const_iterator pos) {
+    return _erase(begin() + (pos - cbegin()));
   }
 
   void clear() noexcept {
@@ -120,4 +173,13 @@ private:
   size_t m_size;
   size_t m_capacity;
   char *m_buffer;
+
+  iterator _erase(iterator pos) {
+    pos->~T();
+    for (iterator it = pos + 1; it != end(); it++) {
+      std::swap(*(it - 1), *it);
+    }
+    m_size--;
+    return pos;
+  }
 };
