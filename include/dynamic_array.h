@@ -5,7 +5,51 @@
 
 template <typename T> class dynamic_array {
 public:
-  struct const_iterator;
+  struct const_iterator {
+    const_iterator(T const *ptr) : m_ptr(ptr) {}
+
+    T const &operator*() const { return *m_ptr; }
+    T const *operator->() const { return m_ptr; }
+    const_iterator &operator++() {
+      m_ptr++;
+      return *this;
+    }
+    const_iterator operator++(int) {
+      const_iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+    const_iterator &operator--() {
+      m_ptr--;
+      return *this;
+    }
+    const_iterator operator--(int) {
+      const_iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+    friend bool operator==(const_iterator const &a, const_iterator const &b) {
+      return a.m_ptr == b.m_ptr;
+    }
+    friend bool operator!=(const_iterator const &a, const_iterator const &b) {
+      return a.m_ptr != b.m_ptr;
+    }
+    friend const_iterator operator+(const_iterator const &left,
+                                    size_t const &right) {
+      return const_iterator(left.m_ptr + right);
+    }
+    friend const_iterator operator-(const_iterator const &left,
+                                    size_t const &right) {
+      return const_iterator(left.m_ptr - right);
+    }
+    friend size_t operator-(const_iterator const &left,
+                            const_iterator const &right) {
+      return left.m_ptr - right.m_ptr;
+    }
+
+  private:
+    T const *m_ptr;
+  };
 
   struct iterator {
     iterator(T *ptr) : m_ptr(ptr) {}
@@ -52,59 +96,76 @@ public:
     T *m_ptr;
   };
 
-  struct const_iterator {
-    const_iterator(T const *ptr) : m_ptr(ptr) {}
-    const_iterator(iterator const &it) : m_ptr(std::addressof(*it)) {}
-
-    T const &operator*() const { return *m_ptr; }
-    T const *operator->() const { return m_ptr; }
-    const_iterator &operator++() {
-      m_ptr++;
-      return *this;
-    }
-    const_iterator operator++(int) {
-      const_iterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-    const_iterator &operator--() {
-      m_ptr--;
-      return *this;
-    }
-    const_iterator operator--(int) {
-      const_iterator tmp = *this;
-      --(*this);
-      return tmp;
-    }
-    friend bool operator==(const_iterator const &a, const_iterator const &b) {
-      return a.m_ptr == b.m_ptr;
-    }
-    friend bool operator!=(const_iterator const &a, const_iterator const &b) {
-      return a.m_ptr != b.m_ptr;
-    }
-    friend const_iterator operator+(const_iterator const &left,
-                                    size_t const &right) {
-      return const_iterator(left.m_ptr + right);
-    }
-    friend const_iterator operator-(const_iterator const &left,
-                                    size_t const &right) {
-      return const_iterator(left.m_ptr - right);
-    }
-    friend size_t operator-(const_iterator const &left,
-                            const_iterator const &right) {
-      return left.m_ptr - right.m_ptr;
-    }
-
-  private:
-    T const *m_ptr;
-  };
-
   dynamic_array() : m_size(0), m_capacity(0), m_buffer(nullptr) {}
+  dynamic_array(dynamic_array const &x)
+      : m_size(0), m_capacity(0), m_buffer(nullptr) {
+    *this = x;
+  }
+  dynamic_array(dynamic_array &&x) noexcept
+      : m_size(0), m_capacity(0), m_buffer(nullptr) {
+    *this = std::move(x);
+  }
+  dynamic_array(std::initializer_list<T> il)
+      : m_size(0), m_capacity(0), m_buffer(nullptr) {
+    *this = il;
+  }
   ~dynamic_array() {
-    for (iterator it = begin(); it != end(); it++) {
-      it->~T();
+    for (size_t i = 0; i < m_size; i++) {
+      reinterpret_cast<T *>(m_buffer)[i].~T();
     }
     delete[] m_buffer;
+  }
+
+  dynamic_array &operator=(dynamic_array const &x) {
+    for (size_t i = 0; i < m_size; i++) {
+      reinterpret_cast<T *>(m_buffer)[i].~T();
+    }
+
+    if (x.m_size > m_capacity)
+      reserve(x.m_size);
+
+    for (size_t i = 0; i < x.m_size; i++) {
+      new (reinterpret_cast<T *>(m_buffer) + i)
+          T(reinterpret_cast<T *>(x.m_buffer)[i]);
+    }
+
+    m_size = x.m_size;
+    return *this;
+  }
+
+  dynamic_array &operator=(dynamic_array &&x) noexcept {
+    if (this != &x) {
+      for (size_t i = 0; i < m_size; i++) {
+        reinterpret_cast<T *>(m_buffer)[i].~T();
+      }
+      delete[] m_buffer;
+
+      m_size = x.m_size;
+      m_capacity = x.m_capacity;
+      m_buffer = x.m_buffer;
+
+      x.m_size = 0;
+      x.m_capacity = 0;
+      x.m_buffer = nullptr;
+    }
+
+    return *this;
+  }
+
+  dynamic_array &operator=(std::initializer_list<T> il) {
+    for (size_t i = 0; i < m_size; i++) {
+      reinterpret_cast<T *>(m_buffer)[i].~T();
+    }
+
+    if (il.size() > m_capacity)
+      reserve(il.size());
+
+    for (size_t i = 0; i < il.size(); i++) {
+      new (reinterpret_cast<T *>(m_buffer) + i) T(*(il.begin() + i));
+    }
+
+    m_size = il.size();
+    return *this;
   }
 
   iterator begin() const { return iterator(reinterpret_cast<T *>(m_buffer)); }
@@ -163,8 +224,8 @@ public:
   }
 
   void clear() noexcept {
-    for (iterator it = begin(); it != end(); it++) {
-      it->~T();
+    for (size_t i = 0; i < m_size; i++) {
+      reinterpret_cast<T *>(m_buffer)[i].~T();
     }
     m_size = 0;
   }

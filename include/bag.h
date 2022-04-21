@@ -8,20 +8,20 @@
 
 class Bag {
 public:
-  int getSize() const { return m_items.size(); }
+  int getSize() const;
   bool contains(Item const &item) const;
   bool contains(std::string const &item) const;
   int getFrequencyOf(Item const &item) const;
   int getFrequencyOf(std::string const &item) const;
-  bool isEmpty() const { return m_items.empty(); }
+  bool isEmpty() const;
 
   void add(Item const &item);
-  void add(std::string const &item) { add(Item(item)); }
+  void add(std::string const &item);
   bool remove(Item const &item);
-  bool remove(std::string const &item) { return remove(Item(item)); }
+  bool remove(std::string const &item);
   int removeAll(Item const &item);
-  int removeAll(std::string const &item) { return removeAll(Item(item)); }
-  void clear() { m_items.clear(); }
+  int removeAll(std::string const &item);
+  void clear();
   void display() const;
 
 private:

@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 using namespace std;
-#include "item.h"
 #include "bag.h"
+#include "item.h"
 
 int main() {
   // declarations
@@ -39,7 +39,7 @@ int main() {
   cout << "The list has " << groceries.getSize() << " items\n";
 
   cout << "\n==== TEST6: add list items() ====\n";
-// while loop to enter items
+  // while loop to enter items
   cout << "Enter an item ";
   getline(cin, anItem);
   while (anItem != "quit") {
@@ -50,22 +50,22 @@ int main() {
   groceries.display();
 
   cout << "\n==== TEST7: contains() ====\n";
-  cout << "Search for an item that is NOT in the list: " ;
+  cout << "Search for an item that is NOT in the list: ";
   getline(cin, anItem);
-  if ( groceries.contains(anItem) ) 
+  if (groceries.contains(anItem))
     cout << "list contains " << anItem << endl;
   else
     cout << "list does not contain " << anItem << endl;
 
   cout << "\n==== TEST8: contains() ====\n";
-  cout << "Search for an item that is in the list: " ;
+  cout << "Search for an item that is in the list: ";
   getline(cin, anItem);
-  if ( groceries.contains(anItem) ) 
+  if (groceries.contains(anItem))
     cout << "list contains " << anItem << endl;
   else
     cout << "list does not contain " << anItem << endl;
 
   cout << "\n==== TEST9: getFrequencyOf() ====\n";
-  cout << anItem << " is in the list " << groceries.getFrequencyOf(anItem) 
-          << " times. "<< endl;
+  cout << anItem << " is in the list " << groceries.getFrequencyOf(anItem)
+       << " times. " << endl;
 }

@@ -4,18 +4,13 @@
 
 class Item {
 public:
-  Item(std::string const &name) : m_name(name) {}
-  ~Item() = default;
+  Item(std::string const &name);
 
-  std::string getName() const { return m_name; }
-  int compare(const Item &other) const { return m_name.compare(other.m_name); }
+  std::string getName() const;
+  int compare(Item const &other) const;
 
-  friend bool operator==(Item const &left, Item const &right) {
-    return left.compare(right) == 0;
-  }
-  friend bool operator!=(Item const &left, Item const &right) {
-    return left.compare(right) != 0;
-  }
+  friend bool operator==(Item const &left, Item const &right);
+  friend bool operator!=(Item const &left, Item const &right);
 
 private:
   std::string m_name;
