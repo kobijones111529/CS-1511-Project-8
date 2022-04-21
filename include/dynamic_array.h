@@ -1,78 +1,45 @@
 #pragma once
 
-#include <cstddef>
-#include <iostream>
 #include <memory>
 
 template <typename T> class dynamic_array {
 public:
-  struct ConstIterator {
-    ConstIterator(const T *ptr) : m_ptr(ptr) {}
-
-    const T &operator*() const { return *m_ptr; }
-    const T *operator->() const { return m_ptr; }
-
-    friend bool operator==(const ConstIterator &a, const ConstIterator &b) {
-      return a.m_ptr == b.m_ptr;
-    }
-    friend bool operator!=(const ConstIterator &a, const ConstIterator &b) {
-      return a.m_ptr != b.m_ptr;
-    }
-    friend ConstIterator operator+(const ConstIterator &left,
-                                   const size_t &right) {
-      return ConstIterator(left.m_ptr + right);
-    }
-    friend ConstIterator operator-(const ConstIterator &left,
-                                   const size_t &right) {
-      return ConstIterator(left.m_ptr + right);
-    }
-    friend size_t operator-(const ConstIterator &left,
-                            const ConstIterator &right) {
-      return left.m_ptr - right.m_ptr;
-    }
-
-  private:
-    const T *m_ptr;
-  };
-
-  struct Iterator {
-    Iterator(T *ptr) : m_ptr(ptr) {}
-
-    operator ConstIterator() const { return ConstIterator(m_ptr); }
+  struct iterator {
+    iterator(T *ptr) : m_ptr(ptr) {}
 
     T &operator*() const { return *m_ptr; }
     T *operator->() const { return m_ptr; }
-    Iterator &operator++() {
+    iterator &operator++() {
       m_ptr++;
       return *this;
     }
-    Iterator operator++(int) {
-      Iterator tmp = *this;
+    iterator operator++(int) {
+      iterator tmp = *this;
       ++(*this);
       return tmp;
     }
-    Iterator &operator--() {
+    iterator &operator--() {
       m_ptr--;
       return *this;
     }
-    Iterator operator--(int) {
-      Iterator tmp = *this;
+    iterator operator--(int) {
+      iterator tmp = *this;
       --(*this);
       return tmp;
     }
-    friend bool operator==(const Iterator &a, const Iterator &b) {
+    friend bool operator==(const iterator &a, const iterator &b) {
       return a.m_ptr == b.m_ptr;
     }
-    friend bool operator!=(const Iterator &a, const Iterator &b) {
+    friend bool operator!=(const iterator &a, const iterator &b) {
       return a.m_ptr != b.m_ptr;
     }
-    friend Iterator operator+(const Iterator &left, const size_t &right) {
-      return Iterator(left.m_ptr + right);
+    friend iterator operator+(const iterator &left, const size_t &right) {
+      return iterator(left.m_ptr + right);
     }
-    friend Iterator operator-(const Iterator &left, const size_t &right) {
-      return Iterator(left.m_ptr + right);
+    friend iterator operator-(const iterator &left, const size_t &right) {
+      return iterator(left.m_ptr - right);
     }
-    friend size_t operator-(const Iterator &left, const Iterator &right) {
+    friend size_t operator-(const iterator &left, const iterator &right) {
       return left.m_ptr - right.m_ptr;
     }
 
@@ -80,102 +47,77 @@ public:
     T *m_ptr;
   };
 
-  dynamic_array() : m_size(0), m_buffer(nullptr) {}
+  dynamic_array() : m_size(0), m_capacity(0), m_buffer(nullptr) {}
   ~dynamic_array() {
-    for (auto it = begin(); it != end(); it++) {
+    for (iterator it = begin(); it != end(); it++) {
       it->~T();
     }
     delete[] m_buffer;
   }
 
-  Iterator begin() const { return Iterator(reinterpret_cast<T *>(m_buffer)); }
-  Iterator end() const {
-    return Iterator(reinterpret_cast<T *>(m_buffer) + m_size);
+  iterator begin() const { return iterator(reinterpret_cast<T *>(m_buffer)); }
+  iterator end() const {
+    return iterator(reinterpret_cast<T *>(m_buffer) + m_size);
   }
 
   size_t size() const noexcept { return m_size; }
+  size_t capacity() const noexcept { return m_capacity; }
   bool empty() const noexcept { return m_size == 0; }
+  void reserve(size_t n) {
+    if (n <= m_size)
+      return;
 
-  T &operator[](size_t index) { return *(begin() + index); }
-  const T &operator[](size_t index) const { return *(begin() + index); }
+    char *newBuffer = new char[n * sizeof(T)];
+    for (size_t i = 0; i < m_size; i++) {
+      new (reinterpret_cast<T *>(newBuffer) + i)
+          T(reinterpret_cast<T *>(m_buffer)[i]);
+    }
+    delete[] m_buffer;
+    m_buffer = newBuffer;
+    m_capacity = n;
+  }
+
+  T &operator[](size_t index) {
+    return *(reinterpret_cast<T *>(m_buffer) + index);
+  }
+  const T &operator[](size_t index) const {
+    return *(reinterpret_cast<T *>(m_buffer) + index);
+  }
 
   void push_back(const T &val) {
-    char *newBuffer = new char[(m_size + 1) * sizeof(T)];
-    T *oldArray = reinterpret_cast<T *>(m_buffer);
-    T *newArray = reinterpret_cast<T *>(newBuffer);
-    for (size_t i = 0; i < m_size; i++) {
-      new (newArray + i) T(*(oldArray + i));
-    }
-    new (newArray + m_size) T(val);
-    if (oldArray != nullptr) {
-      for (size_t i = 0; i < m_size; i++) {
-        (oldArray + i)->~T();
-      }
-    }
-    if (m_buffer != nullptr) {
-      delete[] m_buffer;
-    }
-    m_buffer = newBuffer;
+    if (m_size >= m_capacity)
+      reserve(m_size * 2 + 1);
+
+    new (reinterpret_cast<T *>(m_buffer) + m_size) T(val);
     m_size++;
   }
 
   void push_back(T &&val) {
-    char *newBuffer = new char[(m_size + 1) * sizeof(T)];
-    T *oldArray = reinterpret_cast<T *>(m_buffer);
-    T *newArray = reinterpret_cast<T *>(newBuffer);
-    for (size_t i = 0; i < m_size; i++) {
-      new (newArray + i) T(*(oldArray + i));
-    }
-    new (newArray + m_size) T(val);
-    if (oldArray != nullptr) {
-      for (size_t i = 0; i < m_size; i++) {
-        (oldArray + i)->~T();
-      }
-    }
-    if (m_buffer != nullptr) {
-      delete[] m_buffer;
-    }
-    m_buffer = newBuffer;
+    if (m_size >= m_capacity)
+      reserve(m_size * 2 + 1);
+
+    new (reinterpret_cast<T *>(m_buffer) + m_size) T(val);
     m_size++;
   }
 
-  Iterator erase(ConstIterator pos) {
-    char *newBuffer = new char[(m_size - 1) * sizeof(T)];
-    T *oldArray = reinterpret_cast<T *>(m_buffer);
-    T *newArray = reinterpret_cast<T *>(newBuffer);
-    Iterator returnIt(nullptr);
-    for (auto oldIt = begin(), newIt = Iterator(newArray); oldIt != end();
-         oldIt++) {
-      if (oldIt != pos) {
-        new (std::addressof(*newIt)) T(*oldIt);
-        newIt++;
-      } else {
-        returnIt = newIt;
-      }
+  iterator erase(const iterator pos) {
+    pos->~T();
+    for (iterator it = pos + 1; it != end(); it++) {
+      std::swap(*(it - 1), *it);
     }
-    if (oldArray != nullptr) {
-      for (size_t i = 0; i < m_size; i++) {
-        (oldArray + i)->~T();
-      }
-    }
-    if (m_buffer != nullptr) {
-      delete[] m_buffer;
-    }
-    m_buffer = newBuffer;
     m_size--;
-    return returnIt;
+    return pos;
   }
 
   void clear() noexcept {
-    for (auto it = begin(); it != end(); it++) {
+    for (iterator it = begin(); it != end(); it++) {
       it->~T();
     }
-    delete[] m_buffer;
-    m_buffer = nullptr;
     m_size = 0;
   }
 
 private:
   size_t m_size;
+  size_t m_capacity;
   char *m_buffer;
 };

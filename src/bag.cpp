@@ -25,7 +25,7 @@ int Bag::getFrequencyOf(const std::string &item) const {
   return getFrequencyOf(Item(item));
 }
 
-void Bag::add(Item item) { m_items.push_back(item); }
+void Bag::add(const Item &item) { m_items.push_back(item); }
 
 bool Bag::remove(const Item &item) {
   auto pos = m_items.begin();

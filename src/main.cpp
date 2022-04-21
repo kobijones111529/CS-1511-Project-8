@@ -25,7 +25,6 @@ int main() {
   cout << "\n==== TEST2: Removing Last Item ====\n";
   groceries.remove("lottery tickets");
   groceries.display();
-
   cout << "\n==== TEST3: isEmpty() ====\n";
   if (groceries.isEmpty())
     cout << "The list is empty\n";

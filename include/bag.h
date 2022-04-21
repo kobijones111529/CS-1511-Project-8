@@ -17,8 +17,8 @@ public:
   int getFrequencyOf(const std::string &item) const;
   bool isEmpty() const { return m_items.empty(); }
 
-  void add(Item item);
-  void add(std::string item) { add(Item(item)); }
+  void add(const Item &item);
+  void add(const std::string &item) { add(Item(item)); }
   bool remove(const Item &item);
   bool remove(const std::string &item) { return remove(Item(item)); }
   int removeAll(const Item &item);
