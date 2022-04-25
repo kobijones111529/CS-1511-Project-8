@@ -140,13 +140,13 @@ public:
       }
       delete[] m_buffer;
 
-      m_size = x.m_size;
-      m_capacity = x.m_capacity;
-      m_buffer = x.m_buffer;
+      m_size = 0;
+      m_capacity = 0;
+      m_buffer = nullptr;
 
-      x.m_size = 0;
-      x.m_capacity = 0;
-      x.m_buffer = nullptr;
+      std::swap(m_size, x.m_size);
+      std::swap(m_capacity, x.m_capacity);
+      std::swap(m_buffer, x.m_buffer);
     }
 
     return *this;
@@ -221,6 +221,15 @@ public:
 
   iterator erase(const_iterator pos) {
     return _erase(begin() + (pos - cbegin()));
+  }
+
+  void swap(dynamic_array &x) {
+    if (this == &x)
+      return;
+
+    std::swap(m_size, x.m_size);
+    std::swap(m_capacity, x.m_capacity);
+    std::swap(m_buffer, x.m_buffer);
   }
 
   void clear() noexcept {
