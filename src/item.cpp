@@ -1,6 +1,7 @@
 #include "item.h"
 
 Item::Item(std::string const &name) : m_name(name) {}
+Item::Item(char const *name) : m_name(name) {}
 
 std::string Item::getName() const { return m_name; }
 

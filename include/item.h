@@ -5,6 +5,7 @@
 class Item {
 public:
   Item(std::string const &name);
+  Item(char const *name);
 
   std::string getName() const;
   int compare(Item const &other) const;
