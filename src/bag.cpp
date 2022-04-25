@@ -34,14 +34,13 @@ void Bag::add(Item const &item) { m_items.push_back(item); }
 void Bag::add(std::string const &item) { m_items.push_back(Item(item)); }
 
 bool Bag::remove(Item const &item) {
-  auto pos = m_items.begin();
-  for (; pos != m_items.end() && *pos != item; pos++) {
+  for (auto it = m_items.begin(); it != m_items.end(); it++) {
+    if (*it == item) {
+      m_items.erase(it);
+      return true;
+    }
   }
-  if (pos == m_items.end()) {
-    return false;
-  }
-  m_items.erase(pos);
-  return true;
+  return false;
 }
 
 bool Bag::remove(std::string const &item) { return remove(Item(item)); }
