@@ -34,17 +34,17 @@ bool Bag::remove(Item const &item) {
 }
 
 int Bag::removeAll(Item const &item) {
-  int found = 0;
+  int removed = 0;
   for (auto it = m_items.begin(); it != m_items.end();) {
     if (*it == item) {
       m_items.erase(it);
-      found++;
+      removed++;
     } else {
       it++;
     }
   }
 
-  return found;
+  return removed;
 }
 
 void Bag::clear() { m_items.clear(); }
